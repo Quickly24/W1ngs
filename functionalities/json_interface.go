@@ -5,16 +5,15 @@ import (
 	"os"
 )
 
-func TODOReadJSON[mapType map[string]TODOitem](filename string) (mapType, error) {
-	var data mapType
+func ReadJSON(filename string, mapPointer any) error {
 	filedata, err := os.ReadFile(filename)
 	if err != nil {
-		return data, err
+		return err
 	}
-	return data, json.Unmarshal(filedata, &data)
+	return json.Unmarshal(filedata, mapPointer)
 }
 
-func TODOSaveJSON[mapType map[string]TODOitem](filename string, data mapType) error {
+func SaveJSON(filename string, data any) error {
 	marshalled_map, err := json.Marshal(data)
 	if err != nil {
 		return err

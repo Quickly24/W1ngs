@@ -1,24 +1,18 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	fnct "main/functionalities"
+	itfc "main/interfaces"
+	"os"
 )
 
 func main() {
-	data := make(map[string]fnct.TODOitem)
-	data, err := fnct.TODOReadJSON("data_save/test_data.json")
-	if err != nil {
-		fmt.Println(err)
-		return
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("~~ W1ngs ~~\nuse :help to get a list of usable commands :>")
+	for {
+		itfc.MainScreenInterface(reader)
 	}
-	for i := range data {
-		v := data[i]
-		fmt.Scanf("%s", &v.Name)
-		data[i] = v
-	}
-	fmt.Print(data["1"].Name)
-	err = fnct.TODOSaveJSON("data_save/test_save_data.json", data)
 }
 
 // lista := map[string]int{"one": 5, "two": 4, "three": 6, "four": 7, "five": 8}
