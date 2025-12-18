@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	fnct "main/functionalities"
-	"maps"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var TODO_json_file_path string = "data_save/test_data.json"
 
 // Create a new TODO item from leftover
 // arguemnts in current command.
@@ -19,17 +19,19 @@ func createTODOitem(args []string) *fnct.TODOitem {
 	return &new_TODO_item
 }
 
-func readTODOjson() map[string]*fnct.TODOitem {
-	data := make(map[string]*fnct.TODOitem)
-	err := fnct.ReadJSON("data_save/test_save_data.json", &data)
+func readTODOjson() []*fnct.TODOitem {
+	packed_data := map[string][]*fnct.TODOitem{}
+	err := fnct.ReadJSON(TODO_json_file_path, &packed_data)
 	if err != nil {
 		panic(err)
 	}
+	data := packed_data["body"]
 	return data
 }
 
-func writeTODOjson(data map[string]*fnct.TODOitem) {
-	err := fnct.SaveJSON("data_save/test_save_data.json", data)
+func writeTODOjson(data []*fnct.TODOitem) {
+	packed_data := map[string][]*fnct.TODOitem{"body": data}
+	err := fnct.SaveJSON(TODO_json_file_path, packed_data)
 	if err != nil {
 		panic(err)
 	}
@@ -37,29 +39,56 @@ func writeTODOjson(data map[string]*fnct.TODOitem) {
 
 func TODOInterface(reader *bufio.Reader, args []string) {
 	data := readTODOjson()
-	// Get list od keys, keys in int form,
-	// get max value of int key (for adding new items).
-	data_keys := slices.Collect(maps.Keys(data))
-	data_keys_int := []int{}
-	for _, key := range data_keys {
-		key_int, err := strconv.Atoi(key)
-		if err != nil {
-			panic(err)
-		}
-		data_keys_int = append(data_keys_int, key_int)
-	}
-	max_index := slices.Max(data_keys_int)
 
 	// Subcommands that reroute or terminate the interface.
 	if len(args) > 0 {
-		if args[0] == ".n" {
-			max_index++
-			data[strconv.Itoa(max_index)] = createTODOitem(args[1:])
+		switch args[0] {
+		case ".n": // New TODOitem
+			data = append(data, createTODOitem(args[1:]))
 			writeTODOjson(data)
 			return
-		}
-		if args[0] == ".d" {
-			// WIP
+
+		case ".d": // Done TODOitem, by index for now
+			int_arg, err := strconv.Atoi(args[1])
+			if err != nil {
+				fmt.Println("Wrong index")
+				return
+			}
+			int_arg--
+			ok := len(data) >= int_arg
+			if !ok {
+				fmt.Println("Wrong index")
+				return
+			}
+			data[int_arg].Done = true
+			writeTODOjson(data)
+
+		case ".del": // DELete TODOitem, by index for now
+			int_arg, err := strconv.Atoi(args[1])
+			if err != nil {
+				fmt.Println("Wrong index")
+				return
+			}
+			int_arg--
+			ok := len(data) >= int_arg
+			if !ok {
+				fmt.Println("Wrong index")
+				return
+			}
+			fmt.Printf("Are you sure you want to delete %v? (y/n)\n", data[int_arg].Name)
+			user_ans, err := reader.ReadString('\n')
+			user_ans = strings.TrimSpace(user_ans)
+			if err != nil {
+				panic(err)
+			}
+			if user_ans == "y" {
+				data = append(data[:int_arg], data[int_arg+1:]...)
+				writeTODOjson(data)
+			}
+
+		default:
+			fmt.Println("Wrong arg")
+			return
 		}
 	}
 
@@ -68,6 +97,6 @@ func TODOInterface(reader *bufio.Reader, args []string) {
 	fmt.Println("Your TODO list:")
 
 	for index, item := range data {
-		fmt.Printf("%v. %s ~> %v\n", index, item.Name, item.Done)
+		fmt.Printf("%v. %s ~> %v\n", index+1, item.Name, item.Done)
 	}
 }

@@ -2,8 +2,13 @@ package itfc
 
 import (
 	"bufio"
+	"fmt"
 )
 
 func MainScreenInterface(reader *bufio.Reader) {
-	CommandListener(reader)
+	ClearScreen()
+	fmt.Println("~~ W1ngs ~~\nuse :help to get a list of usable commands :>")
+	for {
+		CommandListener(reader)
+	}
 }
