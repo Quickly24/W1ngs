@@ -19,60 +19,54 @@ func createTODOitem(args []string) *fnct.TODOitem {
 	return &new_TODO_item
 }
 
-func readTODOjson() []*fnct.TODOitem {
-	packed_data := map[string][]*fnct.TODOitem{}
-	err := fnct.ReadJSON(TODO_json_file_path, &packed_data)
-	if err != nil {
-		panic(err)
-	}
-	data := packed_data["body"]
-	return data
-}
-
-func writeTODOjson(data []*fnct.TODOitem) {
-	packed_data := map[string][]*fnct.TODOitem{"body": data}
-	err := fnct.SaveJSON(TODO_json_file_path, packed_data)
-	if err != nil {
-		panic(err)
-	}
-}
-
 func TODOInterface(reader *bufio.Reader, args []string) {
-	data := readTODOjson()
-
+	data := fnct.ReadTODOListJSON(TODO_json_file_path)
+	args_len := len(args)
 	// Subcommands that reroute or terminate the interface.
-	if len(args) > 0 {
+	if args_len > 0 {
 		switch args[0] {
 		case ".n": // New TODOitem
+			if args_len < 2 {
+				fmt.Println("Wrong arguments ~> :td .n {name}")
+				return
+			}
 			data = append(data, createTODOitem(args[1:]))
-			writeTODOjson(data)
+			fnct.WriteTODOListJSON(TODO_json_file_path, data)
 			return
 
 		case ".d": // Done TODOitem, by index for now
+			if args_len < 2 {
+				fmt.Println("Wrong arguments ~> :td .d {index}")
+				return
+			}
 			int_arg, err := strconv.Atoi(args[1])
 			if err != nil {
-				fmt.Println("Wrong index")
+				fmt.Println("Wrong arguments ~> :td .d {index}")
 				return
 			}
 			int_arg--
 			ok := len(data) >= int_arg
 			if !ok {
-				fmt.Println("Wrong index")
+				fmt.Println("Wrong arguments ~> :td .d {index}")
 				return
 			}
 			data[int_arg].Done = true
-			writeTODOjson(data)
+			fnct.WriteTODOListJSON(TODO_json_file_path, data)
 
 		case ".del": // DELete TODOitem, by index for now
+			if args_len < 2 {
+				fmt.Println("Wrong arguments ~> :td .del {index}")
+				return
+			}
 			int_arg, err := strconv.Atoi(args[1])
 			if err != nil {
-				fmt.Println("Wrong index")
+				fmt.Println("Wrong arguments ~> :td .del {index}")
 				return
 			}
 			int_arg--
 			ok := len(data) >= int_arg
 			if !ok {
-				fmt.Println("Wrong index")
+				fmt.Println("Wrong arguments ~> :td .del {index}")
 				return
 			}
 			fmt.Printf("Are you sure you want to delete %v? (y/n)\n", data[int_arg].Name)
@@ -83,11 +77,11 @@ func TODOInterface(reader *bufio.Reader, args []string) {
 			}
 			if user_ans == "y" {
 				data = append(data[:int_arg], data[int_arg+1:]...)
-				writeTODOjson(data)
+				fnct.WriteTODOListJSON(TODO_json_file_path, data)
 			}
 
 		default:
-			fmt.Println("Wrong arg")
+			fmt.Println("Wrong argument ~> :td {.n .d .del}")
 			return
 		}
 	}

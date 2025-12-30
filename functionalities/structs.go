@@ -5,3 +5,9 @@ type TODOitem struct {
 	Done bool
 	Time string
 }
+
+type CounterItem struct {
+	Name string
+	Value int
+	Limit int
+}

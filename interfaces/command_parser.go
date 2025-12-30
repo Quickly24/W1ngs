@@ -18,7 +18,7 @@ func exit(reader *bufio.Reader, args []string) {
 }
 
 // Some static declarations
-var main_commands = map[string]func(reader *bufio.Reader, args []string){":td": TODOInterface, ":qq": exit}
+var main_commands = map[string]func(reader *bufio.Reader, args []string){":td": TODOInterface, ":cn": CounterInterface, ":qq": exit}
 
 // Clear screen depending on the OS
 var clear = map[string]func(){"windows": func() {

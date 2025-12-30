@@ -6,9 +6,6 @@ Variables ~> snake_case
 Local function, classes, structs ~> camelCase
 
 TODO:
-JSON file reading and saving +
-COMMAND PARSER !!! (in progress)
-TODO list (in progress)
 .show list of TODO items with some affix
 Writing notes
 .file for substituting strings
@@ -18,4 +15,4 @@ Writing notes
 Calendar
 Planner
 Some art visual overhaul
-
+Counter
